@@ -1,5 +1,6 @@
 {
-  defaults = import ./base-module.nix;
+  defaults = import ./base.nix;
+
   gratarola = {
     deployment.targetHost = "192.168.100.121";
 
@@ -17,9 +18,6 @@
       };
       "/var/media" = {
         device = "/mnt/ironwolf4000/media";
-        fsType = "fuse.mergerfs";
-        options = [ "defaults" "allow_other" "category.create=mfs" ];
-        noCheck = true;
       };
     };
 

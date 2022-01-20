@@ -1,6 +1,19 @@
 {pkgs, lib, config, ...}:
 {
   imports = [ ./qbittorrent.nix ];
+
+  fileSystems."/var/media" = {
+    fsType = "fuse.mergerfs";
+    options = [
+      "allow_other"
+      "use_ino"
+      "cache.files=partial"
+      "dropcacheonclose=true"
+      "category.create=mfs"
+    ];
+    noCheck = true;
+  };
+
   time.timeZone = "Americas/Argentina/Buenos_Aires";
   nixpkgs.config.allowUnfree = true;
   environment.systemPackages = with pkgs; [
@@ -15,11 +28,6 @@
     enable = true;
     permitRootLogin = "yes";
   };
-
-  # Sleep when power button is pressed
-  services.logind.extraConfig = ''
-    HandlePowerKey=suspend
-  '';
 
   # mDNS, allows resolving gratarola.local
   services.avahi = {
@@ -36,6 +44,7 @@
     openFirewall = true;
     managePlugins = false;
   };
+
   services.tautulli.enable = true;
   networking.firewall.allowedTCPPorts = [ config.services.tautulli.port ];
 
@@ -46,7 +55,12 @@
 
   services.qbittorrent = {
     enable = true;
-    # group = "media";
     openFirewall = true;
   };
+
+  services.jackett = {
+    enable = true;
+    openFirewall = true;
+  };
+
 }

@@ -2,7 +2,7 @@
 with lib;
 let
   cfg = config.services.qbittorrent;
-  configDir = "${cfg.dataDir}/.config";
+  configDir = "/var/lib/qbittorrent";
   # openFilesLimit = 4096;
 in
 {
@@ -33,7 +33,7 @@ in
 
     group = mkOption {
       type = types.str;
-      default = "qbittorrent";
+      default = "plex";
       description = ''
         Group under which qBittorrent runs.
       '';
@@ -82,7 +82,7 @@ in
       after = [ "network.target" ];
       description = "qBittorrent Daemon";
       wantedBy = [ "multi-user.target" ];
-      path = [ pkgs.qbittorrent ];
+      path = [ pkgs.qbittorrent-nox ];
       serviceConfig = {
         ExecStart = ''
           ${pkgs.qbittorrent-nox}/bin/qbittorrent-nox \
