@@ -94,7 +94,7 @@ in
         Restart = "on-success";
         User = cfg.user;
         Group = cfg.group;
-        # UMask = "0002";
+        UMask = "0002";
         # LimitNOFILE = cfg.openFilesLimit;
       };
     };

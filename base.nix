@@ -50,6 +50,7 @@
 
   services.sonarr = {
     enable = true;
+    group = "plex";
     openFirewall = true;
   };
 

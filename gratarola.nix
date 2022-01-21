@@ -31,5 +31,9 @@
       };
     };
 
+    # Sleep when power button is pressed
+    services.logind.extraConfig = ''
+      HandlePowerKey=suspend
+    '';
   };
 }
