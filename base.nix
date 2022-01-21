@@ -2,18 +2,6 @@
 {
   imports = [ ./qbittorrent.nix ];
 
-  fileSystems."/var/media" = {
-    fsType = "fuse.mergerfs";
-    options = [
-      "allow_other"
-      "use_ino"
-      "cache.files=partial"
-      "dropcacheonclose=true"
-      "category.create=mfs"
-    ];
-    noCheck = true;
-  };
-
   time.timeZone = "Americas/Argentina/Buenos_Aires";
   nixpkgs.config.allowUnfree = true;
   environment.systemPackages = with pkgs; [

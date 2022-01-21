@@ -18,6 +18,15 @@
       };
       "/var/media" = {
         device = "/mnt/ironwolf4000/media";
+        fsType = "fuse.mergerfs";
+        options = [
+          "allow_other"
+          "use_ino"
+          "cache.files=partial"
+          "dropcacheonclose=true"
+          "category.create=mfs"
+        ];
+        noCheck = true;
       };
     };
 
