@@ -57,8 +57,8 @@
       # allow the Tailscale UDP port through the firewall
       allowedUDPPorts = [ config.services.tailscale.port ];
 
-      # # allow you to SSH in over the public internet
-      # allowedTCPPorts = [ 22 ];
+      # allow you to SSH in over the public internet
+      allowedTCPPorts = [ 22 ];
     };
     # create a oneshot job to authenticate to Tailscale
     systemd.services.tailscale-autoconnect = {

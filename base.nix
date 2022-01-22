@@ -34,7 +34,7 @@
   };
 
   services.tautulli.enable = true;
-  networking.firewall.allowedTCPPorts = [ config.services.tautulli.port ];
+  networking.firewall.allowedTCPPorts = [ config.services.tautulli.port 80 ];
 
   services.sonarr = {
     enable = true;
@@ -61,6 +61,14 @@
   services.ombi = {
     enable = true;
     openFirewall = true;
+  };
+
+  services.nginx = {
+    enable = true;
+    recommendedProxySettings = true;
+    virtualHosts."gratarola" = {
+      locations."/".proxyPass = "http://localhost:${toString config.services.ombi.port}";
+    };
   };
 
 }
