@@ -54,6 +54,7 @@
 
   services.jellyfin = {
     enable = true;
+    openFirewall = true;
   };
 
   services.tautulli.enable = true;
@@ -67,6 +68,13 @@
     enable = true;
     group = config.services.jellyfin.group;
   };
+
+  services.bazarr = {
+    enable = true;
+    group = config.services.jellyfin.group;
+  };
+  # bazarr needs unrar
+  nixpkgs.config.allowUnfree = true;
 
   services.qbittorrent = {
     enable = true;
