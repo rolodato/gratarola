@@ -14,5 +14,6 @@
       };
 
       networking.hostName = "vgratarola";
+      networking.firewall.enable = false;
     };
   }

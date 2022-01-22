@@ -29,38 +29,31 @@
 
   services.plex = {
     enable = true;
-    openFirewall = true;
     managePlugins = false;
   };
 
   services.tautulli.enable = true;
-  networking.firewall.allowedTCPPorts = [ config.services.tautulli.port 80 ];
 
   services.sonarr = {
     enable = true;
     group = "plex";
-    openFirewall = true;
   };
 
   services.radarr = {
     enable = true;
     group = "plex";
-    openFirewall = true;
   };
 
   services.qbittorrent = {
     enable = true;
-    openFirewall = true;
   };
 
   services.jackett = {
     enable = true;
-    openFirewall = true;
   };
 
   services.ombi = {
     enable = true;
-    openFirewall = true;
   };
 
   services.nginx = {
@@ -70,5 +63,6 @@
       locations."/".proxyPass = "http://localhost:${toString config.services.ombi.port}";
     };
   };
+  networking.firewall.allowedTCPPorts = [ 80 ];
 
 }
