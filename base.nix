@@ -3,7 +3,6 @@
   imports = [ ./qbittorrent.nix ];
 
   time.timeZone = "Americas/Argentina/Buenos_Aires";
-  nixpkgs.config.allowUnfree = true;
   environment.systemPackages = with pkgs; [
     vim
     nmon
@@ -17,6 +16,32 @@
     permitRootLogin = "yes";
   };
 
+  # services.grafana = {
+  #   enable = true;
+  #   domain = "grafana.gratarola";
+  #   port = 2112;
+  # };
+  # networking.firewall.allowedTCPPorts = [ config.services.grafana.port ];
+
+  services.prometheus = {
+    enable = true;
+    exporters = {
+      node = {
+        enable = true;
+        enabledCollectors = [ "systemd" ];
+        port = 9002;
+      };
+    };
+    scrapeConfigs = [
+      {
+        job_name = "gratarola";
+        static_configs = [{
+          targets = [ "127.0.0.1:${toString config.services.prometheus.exporters.node.port}" ];
+        }];
+      }
+    ];
+  };
+
   # mDNS, allows resolving gratarola.local
   services.avahi = {
     enable = true;
@@ -27,25 +52,25 @@
     };
   };
 
-  services.plex = {
+  services.jellyfin = {
     enable = true;
-    managePlugins = false;
   };
 
   services.tautulli.enable = true;
 
   services.sonarr = {
     enable = true;
-    group = "plex";
+    group = config.services.jellyfin.group;
   };
 
   services.radarr = {
     enable = true;
-    group = "plex";
+    group = config.services.jellyfin.group;
   };
 
   services.qbittorrent = {
     enable = true;
+    group = config.services.jellyfin.group;
   };
 
   services.jackett = {
@@ -55,14 +80,5 @@
   services.ombi = {
     enable = true;
   };
-
-  services.nginx = {
-    enable = true;
-    recommendedProxySettings = true;
-    virtualHosts."gratarola" = {
-      locations."/".proxyPass = "http://localhost:${toString config.services.ombi.port}";
-    };
-  };
-  networking.firewall.allowedTCPPorts = [ 80 ];
 
 }

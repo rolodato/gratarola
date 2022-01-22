@@ -33,7 +33,7 @@ in
 
     group = mkOption {
       type = types.str;
-      default = "plex";
+      default = "qbittorrent";
       description = ''
         Group under which qBittorrent runs.
       '';
