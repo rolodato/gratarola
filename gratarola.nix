@@ -16,8 +16,12 @@
         device = "/dev/disk/by-uuid/fb9d852b-232f-449e-88b9-759f4541f515";
         options = [ "defaults" "nofail" ];
       };
+      "/mnt/wd500" = {
+        device = "/dev/disk/by-uuid/a03a1968-2acc-4f02-84e5-35e3e4612477";
+        options = [ "defaults" "nofail" ];
+      };
       "/var/media" = {
-        device = "/mnt/ironwolf4000/media";
+        device = "/mnt/ironwolf4000/media:/mnt/wd500/media";
         fsType = "fuse.mergerfs";
         options = [
           "allow_other"
