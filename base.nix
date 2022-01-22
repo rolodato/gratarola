@@ -42,12 +42,23 @@
     openFirewall = true;
   };
 
+  services.radarr = {
+    enable = true;
+    group = "plex";
+    openFirewall = true;
+  };
+
   services.qbittorrent = {
     enable = true;
     openFirewall = true;
   };
 
   services.jackett = {
+    enable = true;
+    openFirewall = true;
+  };
+
+  services.ombi = {
     enable = true;
     openFirewall = true;
   };
