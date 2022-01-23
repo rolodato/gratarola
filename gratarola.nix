@@ -68,7 +68,7 @@
       recommendedProxySettings = true;
       virtualHosts = {
         "gratarola" = {
-          locations."/".proxyPass = "http://localhost:${toString config.services.ombi.port}/";
+          locations."/".proxyPass = "http://127.0.0.1:${toString config.services.ombi.port}/";
         };
       };
     };

@@ -16,12 +16,27 @@
     permitRootLogin = "yes";
   };
 
-  # services.grafana = {
-  #   enable = true;
-  #   domain = "grafana.gratarola";
-  #   port = 2112;
-  # };
-  # networking.firewall.allowedTCPPorts = [ config.services.grafana.port ];
+  services.grafana = {
+    enable = true;
+    addr = "";
+    port = 2112;
+  };
+
+  services.loki = {
+    enable = true;
+    configFile = ./loki.yml;
+  };
+
+  systemd.services.promtail = {
+    description = "Promtail service for Loki";
+    wantedBy = [ "multi-user.target" ];
+
+    serviceConfig = {
+      ExecStart = ''
+        ${pkgs.grafana-loki}/bin/promtail --config.file ${./promtail.yml}
+      '';
+    };
+  };
 
   services.prometheus = {
     enable = true;
@@ -56,8 +71,6 @@
     enable = true;
     openFirewall = true;
   };
-
-  services.tautulli.enable = true;
 
   services.sonarr = {
     enable = true;
