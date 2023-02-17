@@ -1,170 +1,81 @@
 { pkgs, lib, config, ... }:
 {
-  environment.systemPackages = with pkgs; [
-    vim
-    nmon
-    htop
-    mergerfs
-    qbittorrent-nox
+  imports = [
+    ./base.nix
   ];
+  boot.loader.grub.device = "/dev/sda";
+  boot.loader.grub.version = 2;
 
-  services.grafana = {
-    enable = true;
-    settings = {
-      server = {
-        http_port = 2112;
-        http_addr = "";
-      };
+  fileSystems = {
+    "/" = {
+      device = "/dev/disk/by-uuid/3bacbcd0-0312-41cf-8f5b-e1e09e7e5c99";
+      fsType = "ext4";
+    };
+    "/mnt/ironwolf4000" = {
+      device = "/dev/disk/by-uuid/fb9d852b-232f-449e-88b9-759f4541f515";
+      options = [ "defaults" "nofail" ];
+    };
+    "/mnt/wd500" = {
+      device = "/dev/disk/by-uuid/a03a1968-2acc-4f02-84e5-35e3e4612477";
+      options = [ "defaults" "nofail" ];
+    };
+    "/var/media" = {
+      device = "/mnt/ironwolf4000/media:/mnt/wd500/media";
+      fsType = "fuse.mergerfs";
+      options = [
+        "allow_other"
+        "use_ino"
+        "cache.files=partial"
+        "dropcacheonclose=true"
+        "category.create=mfs"
+      ];
+      noCheck = true;
+    };
+  };
+  swapDevices = [{ device = "/dev/disk/by-uuid/314e865e-cd37-4765-bcff-fb7c88f71027"; }];
+  networking = {
+    hostName = "gratarola";
+    interfaces.enp1s0 = {
+      useDHCP = true;
+      wakeOnLan.enable = true;
     };
   };
 
-  services.loki = {
+  # Sleep when power button is pressed
+  services.logind.extraConfig = ''
+    HandlePowerKey=suspend
+  '';
+
+  # Tailscale VPN for static DNS and access from WAN
+  # Remember to log in with `tailscale up`
+  services.tailscale = {
     enable = true;
-    configuration = {
-      auth_enabled = false;
-      server = {
-        http_listen_port = 3100;
-      };
+  };
+  services.openssh.openFirewall = true;
+  networking.firewall = {
+    # always allow traffic from your Tailscale network
+    trustedInterfaces = [ "tailscale0" ];
 
-      common = {
-        path_prefix = "/tmp/loki";
-        storage = {
-          filesystem = {
-            chunks_directory = "/tmp/loki/chunks";
-            rules_directory = "/tmp/loki/rules";
-          };
-        };
-        replication_factor = 1;
-        ring = {
-          instance_addr = "127.0.0.1";
-          kvstore = {
-            store = "inmemory";
-          };
-        };
-      };
+    # allow the Tailscale UDP port through the firewall
+    allowedUDPPorts = [ config.services.tailscale.port ];
 
-      schema_config = {
-        configs = [
-          {
-            from = "2020-10-24";
-            store = "boltdb-shipper";
-            object_store = "filesystem";
-            schema = "v11";
-            index = {
-              prefix = "index_";
-              period = "24h";
-            };
-          }
-        ];
-      };
+    checkReversePath = "loose";
+  };
+
+  services.openssh = {
+    enable = true;
+    permitRootLogin = "yes";
+  };
+  time.timeZone = "Americas/Argentina/Buenos_Aires";
+
+  # mDNS, allows resolving gratarola.local
+  services.avahi = {
+    enable = true;
+    publish = {
+      enable = true;
+      domain = true;
+      addresses = true;
     };
   };
 
-  services.promtail = {
-    configuration = {
-      server = {
-        http_listen_port = 28183;
-        grpc_listen_port = 0;
-      };
-      positions = {
-        filename = "/tmp/positions.yaml";
-      };
-      clients = [{
-        url = "http://127.0.0.1:${toString config.services.loki.configuration.server.http_listen_port}/loki/api/v1/push";
-      }];
-      scrape_configs = [{
-        job_name = "journal";
-        journal = {
-          max_age = "12h";
-          labels = {
-            job = "systemd-journal";
-            host = config.networking.hostName;
-          };
-        };
-        relabel_configs = [{
-          source_labels = [ "__journal__systemd_unit" ];
-          target_label = "unit";
-        }];
-      }];
-    };
-  };
-
-  services.prometheus = {
-    enable = true;
-    exporters = {
-      node = {
-        enable = true;
-        enabledCollectors = [ "systemd" ];
-        port = 9002;
-      };
-    };
-    # scrapeConfigs = [
-    #   {
-    #     job_name = "gratarola";
-    #     static_configs = [{
-    #       targets = [ "127.0.0.1:${toString config.services.prometheus.exporters.node.port}" ];
-    #     }];
-    #   }
-    # ];
-  };
-
-  users.groups.media = { };
-  users.users.plex.extraGroups = [ "media" ];
-
-  services.jellyfin = {
-    enable = true;
-    openFirewall = true;
-    group = "media";
-    user = "plex";
-  };
-
-  services.sonarr = {
-    enable = true;
-    group = config.services.jellyfin.group;
-  };
-
-  services.radarr = {
-    enable = true;
-    group = config.services.jellyfin.group;
-  };
-
-  services.bazarr = {
-    enable = true;
-    group = config.services.jellyfin.group;
-  };
-  # bazarr needs unrar
-  nixpkgs.config.allowUnfree = true;
-
-  services.prowlarr = {
-    enable = true;
-  };
-
-  # services.qbittorrent = {
-  #   enable = true;
-  #   group = config.services.jellyfin.group;
-  # };
-  services.deluge = {
-    enable = true;
-    group = config.services.jellyfin.group;
-  };
-
-  services.jackett = {
-    enable = true;
-  };
-
-  services.ombi = {
-    enable = true;
-  };
-
-  services.nginx = {
-    enable = true;
-    recommendedProxySettings = true;
-    virtualHosts = {
-      "gratarola" = {
-        locations."/".proxyPass = "http://127.0.0.1:${toString config.services.ombi.port}/";
-      };
-    };
-  };
-  networking.firewall.allowedTCPPorts = [ 80 ];
-  system.stateVersion = "22.11";
 }
