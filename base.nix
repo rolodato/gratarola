@@ -154,6 +154,7 @@
       rpc-bind-address = "0.0.0.0";
       rpc-host-whitelist-enabled = false;
     };
+    openPeerPorts = true;
   };
 
   services.jackett = {
