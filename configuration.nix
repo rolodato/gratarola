@@ -2,6 +2,7 @@
 {
   imports = [
     ./base.nix
+    ./nix-alien.nix
   ];
   boot.loader.grub.device = "/dev/sda";
   boot.loader.grub.version = 2;
@@ -51,6 +52,9 @@
   services.tailscale = {
     enable = true;
   };
+  # Required for subnet routing and exit node
+  boot.kernel.sysctl."net.ipv4.ip_forward" = 1;
+
   services.openssh.openFirewall = true;
   networking.firewall = {
     # always allow traffic from your Tailscale network

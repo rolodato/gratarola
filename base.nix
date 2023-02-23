@@ -6,6 +6,8 @@
     htop
     mergerfs
     file
+    wget
+    zulu
   ];
 
   services.grafana = {
